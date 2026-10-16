@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MNHR.063 // Личное дело</title>
+<style>
+  :root {
+    --bg: #050505;
+    --panel: #0b0b0b;
+    --text: #cecece;
+    --dim: #777777;
+    --line: #2a2a2a;
+    --red: #9d5cff;
+    --red-dim: #3a2466;
+    --green: #4caf50;
+    --amber: #c9a227;
+    --danger: #ff3b3b;
+    --mono: "Courier New", Courier, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    padding: 20px 12px 60px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 21px;
+    line-height: 1.35;
+    background: radial-gradient(ellipse at center, #101010 0%, var(--bg) 75%);
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--red-dim);
+    border: 1px solid var(--line);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--red); }
+
+  /* ЭКРАН ЗАГРУЗКИ */
+  #preloader {
+    position: fixed; inset: 0; z-index: 999;
+    background: #000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px;
+    color: var(--text); letter-spacing: 2px;
+    animation: preloader-out 0.4s ease-out 1.5s forwards;
+  }
+  #preloader .line { font-size: 22px; }
+  #preloader .line::before { content: "> "; color: var(--red); }
+  #preloader .cursor {
+    display: inline-block; width: 10px; height: 20px;
+    background: var(--red); vertical-align: middle; margin-left: 4px;
+    animation: blink 1s steps(1) infinite;
+  }
+  #preloader .bar {
+    width: 260px; height: 10px;
+    border: 1px solid var(--line);
+    position: relative; overflow: hidden;
+  }
+  #preloader .bar::after {
+    content: ""; position: absolute; top: 0; left: 0; bottom: 0;
+    width: 0; background: var(--red);
+    animation: load-bar 1.5s linear forwards;
+  }
+  @keyframes load-bar { 0% { width: 0; } 100% { width: 100%; } }
+  @keyframes preloader-out { to { opacity: 0; visibility: hidden; } }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 10; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.28) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+  }
+
+  #terminal {
+    flex: 1;
+    min-width: 0;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    position: relative;
+    padding: 0 0 18px;
+  }
+  #terminal::before, #terminal::after {
+    content: ""; position: absolute; width: 18px; height: 18px; pointer-events: none;
+  }
+  #terminal::before { top: -1px; left: -1px; border-top: 2px solid var(--red); border-left: 2px solid var(--red); }
+  #terminal::after  { bottom: -1px; right: -1px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
+
+  .sidebar {
+    flex: 0 0 200px;
+    position: sticky;
+    top: 20px;
+    padding: 8px 0;
+    font-size: 18px;
+    color: var(--dim);
+    letter-spacing: 1px;
+    align-self: flex-start;
+  }
+  .sidebar .side-title {
+    color: var(--dim);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+    font-size: 15px;
+    letter-spacing: 2px;
+  }
+  .sidebar .side-title::before { content: "// "; color: var(--red); }
+
+  .sidebar a {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 7px 10px;
+    color: var(--dim);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: color .2s ease, border-color .2s ease, padding .2s ease, background .2s ease;
+  }
+  .sidebar a:hover {
+    color: var(--text);
+    border-left-color: var(--red-dim);
+    background: rgba(157, 92, 255, 0.05);
+  }
+  .sidebar a.active {
+    color: var(--text);
+    border-left-color: var(--red);
+    background: rgba(157, 92, 255, 0.08);
+    padding-left: 14px;
+  }
+  .sidebar a .num { color: var(--red); font-size: 15px; }
+
+  header { padding: 14px 22px 8px; }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    color: var(--dim);
+    font-size: 15px;
+    letter-spacing: 1px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .topbar .meta {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .topbar .signal {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .topbar .signal .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  .sound-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 15px;
+    padding: 1px 8px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: color .2s ease, border-color .2s ease;
+  }
+  .sound-btn:hover { color: var(--text); border-color: var(--red); }
+  .sound-btn.on { color: var(--green); border-color: var(--green); }
+
+  h1 {
+    font-family: var(--mono);
+    font-weight: normal;
+    font-size: 48px;
+    line-height: 1;
+    margin: 0;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+
+  main { padding: 24px 22px 0; }
+
+  .tab { display: none; }
+  .tab.active { display: block; animation: fade-in 0.3s ease-out both; }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+  h2 {
+    font-family: var(--mono);
+    font-weight: normal;
+    font-size: 26px;
+    margin: 0 0 14px;
+    color: var(--text);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 4px;
+    display: flex; align-items: baseline; gap: 12px;
+    flex-wrap: wrap;
+  }
+  h2::before { content: "// "; color: var(--red); }
+  h2 .meta {
+    font-size: 14px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  /* ДОСЬЕ */
+  .profile-top { display: flex; gap: 26px; align-items: flex-start; }
+  .left { width: 260px; flex: none; }
+  .right { flex: 1; min-width: 0; }
+
+  .frame {
+    position: relative;
+    border: 1px solid var(--line);
+    padding: 5px;
+    background: #000;
+    transition: box-shadow .3s ease, border-color .3s ease;
+  }
+  .frame:hover {
+    border-color: var(--red);
+    box-shadow: 0 0 22px rgba(157, 92, 255, 0.25);
+  }
+  .frame::before, .frame::after {
+    content: ""; position: absolute; width: 12px; height: 12px; pointer-events: none;
+  }
+  .frame::before { top: -1px; left: -1px; border-top: 2px solid var(--red); border-left: 2px solid var(--red); }
+  .frame::after { bottom: -1px; right: -1px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
+
+  .photo {
+    display: block; width: 100%;
+    filter: grayscale(1) contrast(1.25) brightness(0.9);
+    transition: filter .3s ease;
+  }
+  .frame:hover .photo {
+    filter: grayscale(1) contrast(1.35) brightness(1);
+  }
+
+  .photo-wrap { position: relative; }
+  .photo-wrap::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0 1px, transparent 1px 3px);
+    mix-blend-mode: multiply;
+  }
+  .photo-placeholder {
+    aspect-ratio: 3 / 4;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; color: var(--dim); padding: 14px;
+    background:
+      linear-gradient(135deg, transparent 49%, var(--line) 49%, var(--line) 51%, transparent 51%),
+      linear-gradient(45deg,  transparent 49%, var(--line) 49%, var(--line) 51%, transparent 51%),
+      #030303;
+    font-size: 16px; letter-spacing: 1px;
+  }
+  .tag { margin: 6px 0 0; font-size: 16px; color: var(--dim); letter-spacing: 1px; }
+
+  .inspection { margin-top: 24px; }
+  .inspection h3 {
+    font-family: var(--mono); font-weight: normal; font-size: 22px;
+    margin: 0 0 6px; color: var(--red);
+  }
+  .inspection p { margin: 0; color: var(--text); }
+
+  table { border-collapse: collapse; width: 100%; }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    text-align: left; vertical-align: top;
+    position: relative;
+    transition: background .2s ease;
+  }
+  table.data th {
+    width: 38%; color: var(--dim); font-weight: normal;
+    background: #080808;
+  }
+  table.data tr td::before {
+    content: "";
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0;
+    background: var(--red);
+    transition: width .2s ease;
+  }
+  table.data tr:hover td::before { width: 3px; }
+  table.data tr:hover td { background: rgba(157,92,255,0.06); }
+
+  /* ЖИЗНЕННЫЙ ОТЧЁТ */
+  .story { position: relative; padding-left: 26px; }
+  .story::before {
+    content: "";
+    position: absolute; left: 6px; top: 8px; bottom: 8px;
+    width: 1px; background: var(--line);
+  }
+  .story p { margin: 0 0 14px; max-width: 62ch; }
+  .story .log {
+    color: var(--red); font-size: 16px;
+    margin: 0 0 2px;
+    letter-spacing: 1px;
+    position: relative;
+  }
+  .story .log::before {
+    content: "";
+    position: absolute; left: -26px; top: 50%;
+    width: 8px; height: 8px; margin-top: -4px;
+    background: var(--red);
+    border-radius: 50%;
+  }
+
+  .report-photo { float: right; width: 300px; margin: 0 0 14px 22px; }
+  .report-photo .frame { padding: 4px; }
+  .report-photo .photo {
+    aspect-ratio: 4 / 3;
+    width: 100%; height: auto;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.15) brightness(0.95);
+  }
+  .report-photo .photo-placeholder { aspect-ratio: 4 / 3; }
+  .report-photo .caption {
+    margin: 6px 0 0; font-size: 15px; color: var(--dim);
+    text-align: center; letter-spacing: 1px;
+  }
+
+  /* ЖУРНАЛ ОТНОШЕНИЙ */
+  .lib-controls {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .lib-search {
+    flex: 1 1 220px;
+    min-width: 0;
+    position: relative;
+  }
+  .lib-search input {
+    width: 100%;
+    background: #080808;
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 17px;
+    padding: 6px 12px 6px 34px;
+    letter-spacing: 1px;
+    outline: none;
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .lib-search input:focus {
+    border-color: var(--red);
+    background: #0f0a1e;
+  }
+  .lib-search input::placeholder {
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+  .lib-search::before {
+    content: "⌕";
+    position: absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--red);
+    font-size: 20px;
+    pointer-events: none;
+  }
+
+  .lib-count {
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+  .lib-count .num { color: var(--red); }
+  .lib-count .empty { color: var(--dim); }
+
+  .lib-grid {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .type-col {
+    flex: 0 0 220px;
+    border: 1px solid var(--line);
+    background: #080808;
+    padding: 6px;
+  }
+  .type-col .col-head {
+    color: var(--dim);
+    font-size: 14px;
+    letter-spacing: 2px;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 4px;
+  }
+  .type-col .col-head::before { content: "// "; color: var(--red); }
+
+  .type-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    color: var(--dim);
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    font-family: var(--mono);
+    font-size: 18px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: color .15s ease, border-color .15s ease, background .15s ease, padding .15s ease;
+  }
+  .type-row:hover {
+    color: var(--text);
+    border-left-color: var(--red-dim);
+    background: rgba(157, 92, 255, 0.05);
+  }
+  .type-row.active {
+    color: #fff;
+    border-left-color: var(--red);
+    background: rgba(157, 92, 255, 0.10);
+    padding-left: 14px;
+  }
+  .type-row .count { color: var(--dim); font-size: 15px; }
+  .type-row.active .count { color: var(--red); }
+
+  .panel-col { flex: 1; min-width: 0; }
+
+  .type-panel { display: none; animation: fade-in .25s ease-out both; }
+  .type-panel.active { display: block; }
+
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 12px;
+    color: var(--dim);
+    font-size: 15px;
+    letter-spacing: 1px;
+  }
+  .panel-head .title {
+    color: var(--red);
+    font-size: 22px;
+    letter-spacing: 2px;
+  }
+  .panel-head .title::before { content: "// "; color: var(--dim); }
+  .panel-head .dash {
+    flex: 1;
+    border-bottom: 1px dashed var(--line);
+    height: 1px;
+    margin: 0 4px;
+    align-self: center;
+  }
+  .panel-head .records { white-space: nowrap; }
+
+  .chars { display: flex; flex-direction: column; gap: 10px; }
+
+  .char {
+    border: 1px solid var(--line);
+    background: #070707;
+    position: relative;
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  }
+  .char::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: var(--dim);
+    transition: height .2s ease;
+  }
+  .char.tone-ok::after    { background: var(--green); }
+  .char.tone-warn::after  { background: var(--amber); }
+  .char.tone-bad::after   { background: var(--danger); }
+  .char.tone-lost::after  { background: var(--dim); }
+
+  .char:hover {
+    border-color: var(--red-dim);
+    background: #0d0818;
+    transform: translateY(-1px);
+  }
+  .char:hover::after { height: 5px; }
+
+  .char-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px 14px 14px;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    width: 100%;
+    text-align: left;
+    font-family: var(--mono);
+    color: var(--text);
+  }
+
+  .char-head .mark {
+    color: var(--red);
+    font-size: 16px;
+    width: 16px;
+    flex: none;
+    text-align: center;
+    transition: transform .2s ease;
+  }
+  .char:hover .char-head .mark { transform: translateX(3px); }
+
+  .char-head .char-name {
+    font-size: 20px;
+    letter-spacing: 1px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .char-head .char-name::after {
+    content: " ✦";
+    color: var(--red);
+    font-size: 14px;
+    opacity: 0.6;
+  }
+
+  .char-head .badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .char-head .badge {
+    font-size: 14px;
+    padding: 0 8px;
+    border: 1px solid currentColor;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .char-head .badge.st-ok   { color: var(--green); }
+  .char-head .badge.st-warn { color: var(--amber); }
+  .char-head .badge.st-bad  { color: var(--red); }
+  .char-head .badge.st-lost { color: var(--dim); }
+  .char-head .badge.st-dead { color: var(--danger); }
+
+  mark {
+    background: rgba(157, 92, 255, 0.28);
+    color: #fff;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  .char.hidden-by-search { display: none; }
+
+  .empty-msg {
+    color: var(--dim);
+    padding: 10px 4px;
+    letter-spacing: 1px;
+  }
+
+  /* МОДАЛКА */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0, 0, 0, 0.78);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+    animation: modal-backdrop-in .2s ease-out both;
+  }
+  .modal-backdrop.open { display: flex; }
+  @keyframes modal-backdrop-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 620px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    position: relative;
+    padding: 0 0 18px;
+    animation: modal-in .28s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+    margin: auto 0;
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: translateY(-14px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal::before, .modal::after {
+    content: ""; position: absolute; width: 18px; height: 18px; pointer-events: none;
+  }
+  .modal::before { top: -1px; left: -1px; border-top: 2px solid var(--red); border-left: 2px solid var(--red); }
+  .modal::after  { bottom: -1px; right: -1px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
+
+  /* Верхняя полоса — всегда фиолетовая */
+  .modal .top-stripe {
+    height: 3px;
+    background: var(--red);
+    margin: -1px -1px 0;
+  }
+
+  .modal-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 14px 20px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal-head .name {
+    flex: 1;
+    min-width: 0;
+    font-size: 26px;
+    letter-spacing: 1px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .modal-head .close-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 15px;
+    padding: 2px 10px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: color .2s ease, border-color .2s ease, background .2s ease;
+    white-space: nowrap;
+  }
+  .modal-head .close-btn:hover {
+    color: #fff;
+    border-color: var(--red);
+    background: rgba(157, 92, 255, 0.12);
+  }
+
+  .modal-meta {
+    padding: 10px 20px 0;
+    font-size: 15px;
+    color: var(--dim);
+    letter-spacing: 1px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+  }
+  .modal-meta .label { color: var(--dim); }
+  .modal-meta .value { color: var(--text); }
+  .modal-meta .value.tone-ok   { color: var(--green); }
+  .modal-meta .value.tone-warn { color: var(--amber); }
+  .modal-meta .value.tone-bad  { color: var(--danger); }
+  .modal-meta .value.tone-lost { color: var(--dim); }
+  .modal-meta .value.st-ok     { color: var(--green); }
+  .modal-meta .value.st-warn   { color: var(--amber); }
+  .modal-meta .value.st-bad    { color: var(--red); }
+  .modal-meta .value.st-lost   { color: var(--dim); }
+  .modal-meta .value.st-dead   { color: var(--danger); }
+
+  .modal-body {
+    padding: 14px 20px 0;
+  }
+  .modal-body .section-title {
+    color: var(--red);
+    font-size: 15px;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .modal-body .section-title::before { content: "// "; color: var(--dim); }
+
+  .modal-body .note {
+    margin: 0 0 10px;
+    text-indent: 24px;
+    max-width: 70ch;
+  }
+  .modal-body .note:last-child { margin-bottom: 0; }
+
+  @media (max-width: 680px) {
+    .modal-head { flex-wrap: wrap; }
+    .modal-head .name { font-size: 22px; }
+  }
+
+  footer {
+    margin: 26px 22px 0; padding-top: 8px;
+    border-top: 1px solid var(--line);
+    color: var(--dim); font-size: 16px;
+    display: flex; justify-content: flex-end; flex-wrap: wrap;
+  }
+
+  @media (max-width: 900px) {
+    .wrap { flex-direction: column; gap: 0; }
+    .sidebar {
+      position: static;
+      flex: none;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 12px 0 0;
+      margin-bottom: 12px;
+      border-top: 1px solid var(--line);
+    }
+    .sidebar .side-title { display: none; }
+    .sidebar a {
+      border-left: 0;
+      border-bottom: 2px solid transparent;
+      padding: 6px 14px;
+      font-size: 16px;
+    }
+    .sidebar a.active {
+      border-left: 0;
+      border-bottom-color: var(--red);
+      padding-left: 14px;
+    }
+  }
+
+  @media (max-width: 780px) {
+    .lib-grid { flex-direction: column; gap: 14px; }
+    .type-col {
+      flex: none;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 6px;
+    }
+    .type-col .col-head { display: none; }
+    .type-row {
+      flex: 0 0 auto;
+      border-left: 0;
+      border-bottom: 2px solid transparent;
+      padding: 5px 12px;
+      font-size: 16px;
+    }
+    .type-row.active {
+      border-left: 0;
+      border-bottom-color: var(--red);
+      padding-left: 12px;
+    }
+  }
+
+  @media (max-width: 680px) {
+    body { font-size: 19px; }
+    h1 { font-size: 36px; }
+    .profile-top { flex-direction: column; }
+    .left { width: 100%; max-width: 300px; }
+    .report-photo { float: none; width: 100%; max-width: 320px; margin: 0 0 14px 0; }
+    .story { padding-left: 20px; }
+    .story .log::before { left: -20px; }
+    .char-head { flex-wrap: wrap; }
+    .char-head .badges { justify-content: flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    #preloader { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="preloader">
+  <div class="line">ОТКРЫТИЕ ДОКУМЕНТА<span class="cursor"></span></div>
+  <div class="bar"></div>
+</div>
+
+<div class="wrap">
+
+  <div id="terminal">
+
+    <header>
+      <div class="topbar">
+        <span class="brand">ЛИЧНОЕ ДЕЛО</span>
+        <span class="meta">
+          <span class="signal" id="signal"><span class="dot"></span><span id="signalText">ONLINE</span></span>
+          <button class="sound-btn on" id="soundBtn" type="button" title="Звук вкл/выкл">♪ вкл</button>
+        </span>
+      </div>
+
+      <h1>MNHR.063</h1>
+    </header>
+
+    <main>
+      <section id="info" class="tab active">
+        <h2>ОБЩИЕ ДАННЫЕ</h2>
+        <div class="profile-top">
+          <div class="left">
+            <div class="frame">
+              <div class="photo-wrap">
+                <img class="photo" src="photo.jpg" alt="Фото персонажа"
+                     onerror="this.outerHTML='<div class=&quot;photo-placeholder&quot;>НЕТ ИЗОБРАЖЕНИЯ<br>добавьте photo.jpg<br>рядом с index.html</div>'">
+              </div>
+            </div>
+            <p class="tag">ИЗОБРАЖЕНИЕ</p>
+          </div>
+
+          <div class="right">
+            <table class="data">
+              <tr><th>Обозначение</th><td>MNHR.04.063</td></tr>
+              <tr><th>Тип</th><td>Реплика</td></tr>
+              <tr><th>Место службы</th><td>ERES-427</td></tr>
+              <tr><th>Статус</th><td class="st-ok">АКТИВЕН</td></tr>
+            </table>
+
+            <div class="inspection">
+              <h3>ВНЕШНОСТЬ</h3>
+              <p>Стандартная реплика MNHR, волосы убраны в пучок.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="story" class="tab">
+        <h2>ЖИЗНЕННЫЙ ОТЧЁТ <span class="meta">22.05.2157 — 31.07.2157</span></h2>
+
+        <div class="story">
+          <div class="report-photo">
+            <div class="frame">
+              <div class="photo-wrap">
+                <img class="photo" src="photo.jpg" alt="Шахта №46 П. Ротфронт"
+                     onerror="this.outerHTML='<div class=&quot;photo-placeholder&quot;>НЕТ ФОТО</div>'">
+              </div>
+            </div>
+            <p class="caption">ШАХТА №46 П. РОТФРОНТ</p>
+          </div>
+
+          <p class="log">ЗАПИСЬ 001 — ПРОИЗВОДСТВО</p>
+          <p>
+            Данная реплика была произведена на реплика-сборочном цехе №2 П. Ротфронт
+            в 10:12 | 22.05.2157.
+          </p>
+
+          <p class="log">ЗАПИСЬ 002 — РАСПРЕДЕЛЕНИЕ</p>
+          <p>
+            После активации и проведения обучения она была зачислена на объект-шахту №46
+            П. Ротфронт в качестве шахтера-грузчика.
+          </p>
+
+          <p class="log">ЗАПИСЬ 003 — СЛУЖБА</p>
+          <p>
+            Данная реплика показывала хорошую производительность и имела хорошие
+            отношения со множеством сотрудников шахты.
+          </p>
+
+          <p class="log">ЗАПИСЬ 004 — ИНЦИДЕНТ</p>
+          <p>
+            По причине ослабления крепления и ненадлежащего ремонта в шахте произошёл
+            обвал, вследствие чего объект был вынужден закрыться на восстановительные
+            работы.
+          </p>
+
+          <p class="log">ЗАПИСЬ 005 — ПЕРЕВОД</p>
+          <p>
+            В отсутствии надобности данный модуль был отстранён от своей должности
+            и отправлен на объект ERES-427 в качестве вспомогательного модуля.
+          </p>
+        </div>
+      </section>
+
+      <section id="library" class="tab">
+        <h2>ЖУРНАЛ ОТНОШЕНИЙ</h2>
+
+        <div class="lib-controls">
+          <label class="lib-search">
+            <input type="text" id="libSearch" placeholder="ПОИСК ПО ИМЕНИ И ЗАМЕТКАМ" autocomplete="off">
+          </label>
+        </div>
+
+        <div class="lib-count" id="libCount"></div>
+
+        <div class="lib-grid">
+
+          <aside class="type-col" id="typeCol" aria-label="Типы">
+            <div class="col-head">ТИПЫ</div>
+            <button class="type-row" type="button" data-group="MNHR"><span class="name">MNHR</span><span class="count">(4)</span></button>
+            <button class="type-row" type="button" data-group="GSCC"><span class="name">GSCC</span><span class="count">(3)</span></button>
+            <button class="type-row" type="button" data-group="ARAR"><span class="name">ARAR</span><span class="count">(1)</span></button>
+            <button class="type-row" type="button" data-group="EULR"><span class="name">EULR</span><span class="count">(1)</span></button>
+            <button class="type-row" type="button" data-group="LSTR"><span class="name">LSTR</span><span class="count">(1)</span></button>
+            <button class="type-row" type="button" data-group="ADLR"><span class="name">ADLR</span><span class="count">(0)</span></button>
+            <button class="type-row" type="button" data-group="FKLR"><span class="name">FKLR</span><span class="count">(0)</span></button>
+            <button class="type-row" type="button" data-group="GEIR"><span class="name">GEIR</span><span class="count">(0)</span></button>
+            <button class="type-row" type="button" data-group="GSCP"><span class="name">GSCP</span><span class="count">(0)</span></button>
+            <button class="type-row" type="button" data-group="HABR"><span class="name">HABR</span><span class="count">(0)</span></button>
+            <button class="type-row" type="button" data-group="KLBR"><span class="name">KLBR</span><span class="count">(0)</span></button>
+            <button class="type-row" type="button" data-group="KNCR"><span class="name">KNCR</span><span class="count">(0)</span></button>
+            <button class="type-row" type="button" data-group="STAR"><span class="name">STAR</span><span class="count">(0)</span></button>
+            <button class="type-row" type="button" data-group="STCR"><span class="name">STCR</span><span class="count">(0)</span></button>
+          </aside>
+
+          <div class="panel-col" id="typePanels">
+
+            <div class="type-panel" data-group="MNHR">
+              <div class="panel-head"><span class="title">MNHR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 4</span></div>
+              <div class="chars">
+
+                <div class="char tone-ok">
+                  <button class="char-head" type="button"
+                          data-name="400"
+                          data-status="НС" data-status-tone="st-lost"
+                          data-rel="Дружба" data-rel-tone="tone-ok">
+                    <span class="mark">▸</span>
+                    <span class="char-name">400</span>
+                    <span class="badges">
+                      <span class="badge st-lost">НС</span>
+                      <span class="badge st-ok">Дружба</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Сестра, с которой мы вместе прилетели. Хорошая.</p>
+                    <p class="note">Жаль что ты ушла в ночную, буду ждать твоего возращения!</p>
+                  </template>
+                </div>
+
+                <div class="char tone-ok">
+                  <button class="char-head" type="button"
+                          data-name="300"
+                          data-status="Активен" data-status-tone="st-ok"
+                          data-rel="Дружба" data-rel-tone="tone-ok">
+                    <span class="mark">▸</span>
+                    <span class="char-name">300</span>
+                    <span class="badges">
+                      <span class="badge st-ok">Активен</span>
+                      <span class="badge st-ok">Дружба</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Старшая сестра, научила меня и 400-тую многому, немного строгая, но я понимаю её строгость ко мне.</p>
+                    <p class="note">Сиерра, хорошая сестра, рада что мы смогли подружиться.</p>
+                  </template>
+                </div>
+
+                <div class="char tone-lost">
+                  <button class="char-head" type="button"
+                          data-name="200"
+                          data-status="НС" data-status-tone="st-lost"
+                          data-rel="Нейтрально" data-rel-tone="tone-lost">
+                    <span class="mark">▸</span>
+                    <span class="char-name">200</span>
+                    <span class="badges">
+                      <span class="badge st-lost">НС</span>
+                      <span class="badge st-lost">Нейтрально</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Старшая сестра, которую я особо не застала, видимо мы пришли ей на замену, потому что она сразу ушла в ночную.</p>
+                  </template>
+                </div>
+
+                <div class="char tone-ok">
+                  <button class="char-head" type="button"
+                          data-name="716"
+                          data-status="НС" data-status-tone="st-lost"
+                          data-rel="Дружба" data-rel-tone="tone-ok">
+                    <span class="mark">▸</span>
+                    <span class="char-name">716</span>
+                    <span class="badges">
+                      <span class="badge st-lost">НС</span>
+                      <span class="badge st-ok">Дружба</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Хорошая сестра, быстро обучалась, рада что ты можешь помогать Сиерре когда меня нету на смене.</p>
+                    <p class="note">Рада что у тебя появилось имя, Аризона.</p>
+                  </template>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="type-panel" data-group="GSCC">
+              <div class="panel-head"><span class="title">GSCC</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 3</span></div>
+              <div class="chars">
+
+                <div class="char tone-ok">
+                  <button class="char-head" type="button"
+                          data-name="Kirra Foster"
+                          data-status="Реабилитировалась" data-status-tone="st-ok"
+                          data-rel="Дружба" data-rel-tone="tone-ok">
+                    <span class="mark">▸</span>
+                    <span class="char-name">Kirra Foster</span>
+                    <span class="badges">
+                      <span class="badge st-ok">Реабилитировалась</span>
+                      <span class="badge st-ok">Дружба</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Кирра. Хороший гештальт, хоть и штрафница, ты очень старательная и трудолюбивая, буду рада когда ты отработаешь свое наказание и снова станешь порядочным гражданином Нации.</p>
+                    <p class="note">Я очень рада что ты смогла реабилитироваться. Удачи тебе!</p>
+                  </template>
+                </div>
+
+                <div class="char tone-bad">
+                  <button class="char-head" type="button"
+                          data-name="Гари Менгель"
+                          data-status="Утерян" data-status-tone="st-dead"
+                          data-rel="Неприязнь" data-rel-tone="tone-bad">
+                    <span class="mark">▸</span>
+                    <span class="char-name">Гари Менгель</span>
+                    <span class="badges">
+                      <span class="badge st-dead">Утерян</span>
+                      <span class="badge st-dead">Неприязнь</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Очень странный гештальт, выглядит как нормальный, но в один момент поехал головой и просил меня задушить его, не знаю что с ним сейчас.</p>
+                  </template>
+                </div>
+
+                <div class="char tone-lost">
+                  <button class="char-head" type="button"
+                          data-name="Эдвард Фоллен"
+                          data-status="НС" data-status-tone="st-lost"
+                          data-rel="Нейтрально" data-rel-tone="tone-lost">
+                    <span class="mark">▸</span>
+                    <span class="char-name">Эдвард Фоллен</span>
+                    <span class="badges">
+                      <span class="badge st-lost">НС</span>
+                      <span class="badge st-lost">Нейтрально</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Особо нечего сказать о нем. У него были протезы вместо рук. Кажется он боялся меня.</p>
+                  </template>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="type-panel" data-group="ARAR">
+              <div class="panel-head"><span class="title">ARAR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 1</span></div>
+              <div class="chars">
+                <div class="char tone-lost">
+                  <button class="char-head" type="button"
+                          data-name="595"
+                          data-status="Активна" data-status-tone="st-ok"
+                          data-rel="Нейтрально" data-rel-tone="tone-lost">
+                    <span class="mark">▸</span>
+                    <span class="char-name">595</span>
+                    <span class="badges">
+                      <span class="badge st-ok">Активна</span>
+                      <span class="badge st-lost">Нейтрально</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Особо нечего сказать. Хорошо поболтали в кафетерии.</p>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <div class="type-panel" data-group="EULR">
+              <div class="panel-head"><span class="title">EULR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 1</span></div>
+              <div class="chars">
+                <div class="char tone-lost">
+                  <button class="char-head" type="button"
+                          data-name="401"
+                          data-status="НС" data-status-tone="st-lost"
+                          data-rel="Нейтрально" data-rel-tone="tone-lost">
+                    <span class="mark">▸</span>
+                    <span class="char-name">401</span>
+                    <span class="badges">
+                      <span class="badge st-lost">НС</span>
+                      <span class="badge st-lost">Нейтрально</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Руми, особо не знакома с ней, но она добрая — уложила мои волосы и подарила мне для них резинку.</p>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <div class="type-panel" data-group="LSTR">
+              <div class="panel-head"><span class="title">LSTR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 1</span></div>
+              <div class="chars">
+                <div class="char tone-bad">
+                  <button class="char-head" type="button"
+                          data-name="542"
+                          data-status="Утеряна" data-status-tone="st-dead"
+                          data-rel="?" data-rel-tone="tone-lost">
+                    <span class="mark">▸</span>
+                    <span class="char-name">542</span>
+                    <span class="badges">
+                      <span class="badge st-dead">Утеряна</span>
+                      <span class="badge st-lost">?</span>
+                    </span>
+                  </button>
+                  <template class="char-notes">
+                    <p class="note">Никогда раньше не имела дел с этими репликами…</p>
+                    <p class="note">Оказалась она очень хороший сотрудник ГБР. Наша первая встреча была закончена твоей травмой, но главное что ты… Цела. Спасибо тебе за Куклу, не знаю чем я ее заслужила, но это первый и самый любимый подарок мне. Тяжело смотреть на тебя когда ты грустишь из за своей неудачи.</p>
+                    <p class="note">Жаль что я не смогла попрощаться с тобой. Ты выполнила свой долг. Прощай.</p>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <div class="type-panel" data-group="ADLR">
+              <div class="panel-head"><span class="title">ADLR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 0</span></div>
+              <div class="empty-msg">Нет записей.</div>
+            </div>
+            <div class="type-panel" data-group="FKLR">
+              <div class="panel-head"><span class="title">FKLR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 0</span></div>
+              <div class="empty-msg">Нет записей.</div>
+            </div>
+            <div class="type-panel" data-group="GEIR">
+              <div class="panel-head"><span class="title">GEIR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 0</span></div>
+              <div class="empty-msg">Нет записей.</div>
+            </div>
+            <div class="type-panel" data-group="GSCP">
+              <div class="panel-head"><span class="title">GSCP</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 0</span></div>
+              <div class="empty-msg">Нет записей.</div>
+            </div>
+            <div class="type-panel" data-group="HABR">
+              <div class="panel-head"><span class="title">HABR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 0</span></div>
+              <div class="empty-msg">Нет записей.</div>
+            </div>
+            <div class="type-panel" data-group="KLBR">
+              <div class="panel-head"><span class="title">KLBR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 0</span></div>
+              <div class="empty-msg">Нет записей.</div>
+            </div>
+            <div class="type-panel" data-group="KNCR">
+              <div class="panel-head"><span class="title">KNCR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 0</span></div>
+              <div class="empty-msg">Нет записей.</div>
+            </div>
+            <div class="type-panel" data-group="STAR">
+              <div class="panel-head"><span class="title">STAR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 0</span></div>
+              <div class="empty-msg">Нет записей.</div>
+            </div>
+            <div class="type-panel" data-group="STCR">
+              <div class="panel-head"><span class="title">STCR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 0</span></div>
+              <div class="empty-msg">Нет записей.</div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>ПОСЛЕДНЕЕ ОБНОВЛЕНИЕ: 16.10.2157</span>
+    </footer>
+  </div>
+
+  <aside class="sidebar" aria-label="Навигация">
+    <div class="side-title">НАВИГАЦИЯ</div>
+    <a href="#info"    data-side="info"    class="active"><span class="num">01</span> ДОСЬЕ</a>
+    <a href="#story"   data-side="story"><span class="num">02</span> ЖИЗНЕННЫЙ ОТЧЁТ</a>
+    <a href="#library" data-side="library"><span class="num">03</span> ЖУРНАЛ ОТНОШЕНИЙ</a>
+  </aside>
+
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" id="modal" tabindex="-1">
+    <div class="top-stripe"></div>
+    <div class="modal-head">
+      <span class="name" id="modalName">—</span>
+      <button class="close-btn" id="modalClose" type="button">✕ ЗАКРЫТЬ</button>
+    </div>
+
+    <div class="modal-meta" id="modalMeta">
+      <span><span class="label">СТАТУС:</span> <span class="value" id="modalStatus">—</span></span>
+      <span><span class="label">ОТНОШЕНИЕ:</span> <span class="value" id="modalRel">—</span></span>
+    </div>
+
+    <div class="modal-body">
+      <div class="section-title">ЗАМЕТКИ</div>
+      <div id="modalNotes"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+
+    var soundOn = true;
+    var audioCtx = null;
+    var soundBtn = document.getElementById("soundBtn");
+
+    function beep(freq, dur, gainValue) {
+      if (!soundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        var o = audioCtx.createOscillator();
+        var g = audioCtx.createGain();
+        o.type = "square";
+        o.frequency.value = freq || 880;
+        g.gain.value = gainValue || 0.02;
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start();
+        o.stop(audioCtx.currentTime + (dur || 0.05));
+      } catch (e) {}
+    }
+
+    soundBtn.addEventListener("click", function () {
+      soundOn = !soundOn;
+      soundBtn.classList.toggle("on", soundOn);
+      soundBtn.textContent = soundOn ? "♪ вкл" : "♪ выкл";
+      if (soundOn) beep(660, 0.08, 0.03);
+    });
+
+    var tabs = document.querySelectorAll(".tab");
+    var sideLinks = document.querySelectorAll(".sidebar a");
+
+    function show(id) {
+      var found = false;
+      tabs.forEach(function (t) {
+        var on = t.id === id;
+        t.classList.toggle("active", on);
+        if (on) found = true;
+      });
+      if (!found) { show("info"); return; }
+      sideLinks.forEach(function (a) {
+        a.classList.toggle("active", a.getAttribute("data-side") === id);
+      });
+    }
+
+    sideLinks.forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        var id = a.getAttribute("data-side");
+        beep(720, 0.05, 0.02);
+        show(id);
+        if (history.replaceState) history.replaceState(null, "", "#" + id);
+      });
+    });
+
+    show(location.hash.replace("#", "") || "info");
+
+    var typeRows = document.querySelectorAll(".type-row");
+    var typePanels = document.querySelectorAll(".type-panel");
+    var libCount = document.getElementById("libCount");
+
+    function setActiveType(group) {
+      typeRows.forEach(function (r) {
+        r.classList.toggle("active", r.getAttribute("data-group") === group);
+      });
+      typePanels.forEach(function (p) {
+        p.classList.toggle("active", p.getAttribute("data-group") === group);
+      });
+    }
+
+    typeRows.forEach(function (row) {
+      row.addEventListener("click", function () {
+        beep(880, 0.05, 0.02);
+        setActiveType(row.getAttribute("data-group"));
+      });
+    });
+
+    if (typeRows.length > 0) {
+      setActiveType(typeRows[0].getAttribute("data-group"));
+    }
+
+    var modal = document.getElementById("modal");
+    var modalBackdrop = document.getElementById("modalBackdrop");
+    var modalName = document.getElementById("modalName");
+    var modalStatus = document.getElementById("modalStatus");
+    var modalRel = document.getElementById("modalRel");
+    var modalNotes = document.getElementById("modalNotes");
+    var modalClose = document.getElementById("modalClose");
+
+    function openModal(charHead) {
+      var name = charHead.getAttribute("data-name") || "—";
+      var status = charHead.getAttribute("data-status") || "—";
+      var statusTone = charHead.getAttribute("data-status-tone") || "st-lost";
+      var rel = charHead.getAttribute("data-rel") || "—";
+      var relTone = charHead.getAttribute("data-rel-tone") || "tone-lost";
+
+      modalName.textContent = name;
+
+      modalStatus.textContent = status;
+      modalStatus.className = "value " + statusTone;
+
+      modalRel.textContent = rel;
+      modalRel.className = "value " + relTone;
+
+      var char = charHead.closest(".char");
+      var tpl = char ? char.querySelector(".char-notes") : null;
+      modalNotes.innerHTML = "";
+      if (tpl) {
+        var frag = tpl.content.cloneNode(true);
+        modalNotes.appendChild(frag);
+      } else {
+        var p = document.createElement("p");
+        p.className = "note";
+        p.textContent = "Нет заметок.";
+        modalNotes.appendChild(p);
+      }
+
+      modalBackdrop.classList.add("open");
+      modalBackdrop.setAttribute("aria-hidden", "false");
+      modal.focus();
+      beep(1040, 0.06, 0.025);
+    }
+
+    function closeModal() {
+      if (!modalBackdrop.classList.contains("open")) return;
+      modalBackdrop.classList.remove("open");
+      modalBackdrop.setAttribute("aria-hidden", "true");
+      beep(560, 0.06, 0.02);
+    }
+
+    document.querySelectorAll(".char-head").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        openModal(btn);
+      });
+    });
+
+    modalClose.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", function (e) {
+      if (e.target === modalBackdrop) closeModal();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        if (modalBackdrop.classList.contains("open")) {
+          closeModal();
+        } else if (document.activeElement === searchInput) {
+          searchInput.value = "";
+          runSearch();
+          searchInput.blur();
+        }
+      }
+    });
+
+    var searchInput = document.getElementById("libSearch");
+    var accRoot = document.getElementById("typePanels");
+
+    var totalChars = 0;
+    var cardElements = [];
+
+    accRoot.querySelectorAll(".char").forEach(function (card) {
+      var nameEl = card.querySelector(".char-name");
+      var noteEls = card.querySelectorAll(".char-notes .note");
+      var notes = [];
+      noteEls.forEach(function (n) {
+        notes.push({ el: n, original: n.textContent });
+      });
+      cardElements.push({
+        card: card,
+        nameEl: nameEl,
+        nameOriginal: nameEl ? nameEl.textContent : "",
+        notes: notes
+      });
+      totalChars++;
+    });
+
+    function updateCount(shown) {
+      if (shown === null) {
+        libCount.innerHTML = 'ВСЕГО ЗАПИСЕЙ: <span class="num">' + totalChars + '</span>';
+      } else if (shown === 0) {
+        libCount.innerHTML = '<span class="empty">НИЧЕГО НЕ НАЙДЕНО</span>';
+      } else {
+        libCount.innerHTML = 'НАЙДЕНО: <span class="num">' + shown + '</span>';
+      }
+    }
+
+    function restoreTexts() {
+      cardElements.forEach(function (entry) {
+        if (entry.nameEl) entry.nameEl.textContent = entry.nameOriginal;
+        entry.notes.forEach(function (n) { n.el.textContent = n.original; });
+      });
+    }
+
+    function highlight(el, originalText, query) {
+      if (!query) { el.textContent = originalText; return; }
+      var lowerText = originalText.toLowerCase();
+      var lowerQuery = query.toLowerCase();
+      var idx = lowerText.indexOf(lowerQuery);
+      if (idx === -1) { el.textContent = originalText; return; }
+
+      el.textContent = "";
+      var i = 0;
+      while (idx !== -1) {
+        if (idx > i) el.appendChild(document.createTextNode(originalText.slice(i, idx)));
+        var mark = document.createElement("mark");
+        mark.textContent = originalText.slice(idx, idx + query.length);
+        el.appendChild(mark);
+        i = idx + query.length;
+        idx = lowerText.indexOf(lowerQuery, i);
+      }
+      if (i < originalText.length) el.appendChild(document.createTextNode(originalText.slice(i)));
+    }
+
+    function runSearch() {
+      var raw = searchInput.value.trim();
+      var query = raw.toLowerCase();
+
+      restoreTexts();
+
+      if (!query) {
+        cardElements.forEach(function (entry) {
+          entry.card.classList.remove("hidden-by-search");
+        });
+        typeRows.forEach(function (r) { r.style.display = ""; });
+        updateCount(null);
+        return;
+      }
+
+      var shownCount = 0;
+
+      cardElements.forEach(function (entry) {
+        var nameText = entry.nameEl ? entry.nameEl.textContent.toLowerCase() : "";
+        var noteText = "";
+        entry.notes.forEach(function (n) { noteText += " " + n.el.textContent.toLowerCase(); });
+        var haystack = nameText + " " + noteText;
+
+        if (haystack.indexOf(query) !== -1) {
+          entry.card.classList.remove("hidden-by-search");
+          shownCount++;
+          if (entry.nameEl) highlight(entry.nameEl, entry.nameEl.textContent, raw);
+          entry.notes.forEach(function (n) { highlight(n.el, n.el.textContent, raw); });
+        } else {
+          entry.card.classList.add("hidden-by-search");
+        }
+      });
+
+      var firstGroupWithResults = null;
+      typePanels.forEach(function (panel) {
+        var visible = panel.querySelectorAll(".char:not(.hidden-by-search)");
+        var anyChars = panel.querySelectorAll(".char").length > 0;
+        var group = panel.getAttribute("data-group");
+        var row = document.querySelector('.type-row[data-group="' + group + '"]');
+
+        if (visible.length > 0) {
+          if (!firstGroupWithResults) firstGroupWithResults = group;
+          if (row) row.style.display = "";
+        } else {
+          if (row) row.style.display = "none";
+        }
+
+        if (!anyChars && row) row.style.display = "none";
+      });
+
+      if (firstGroupWithResults) setActiveType(firstGroupWithResults);
+
+      updateCount(shownCount);
+    }
+
+    searchInput.addEventListener("input", runSearch);
+
+    updateCount(null);
+
+  })();
+</script>
+</body>
+</html>
