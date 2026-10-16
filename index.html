@@ -218,6 +218,38 @@
     letter-spacing: 1px;
   }
 
+  /* ============================================================
+     ЕДИНЫЙ НАБОР СТАТУСОВ И ОТНОШЕНИЙ
+     Работает везде: в таблице, в бейджах журнала, в модалке.
+     ============================================================ */
+  .st-ok,
+  .badge.st-ok,
+  .value.st-ok,
+  table.data td.st-ok,
+  table.data td.badge.st-ok {
+    color: var(--green);
+  }
+  .st-warn,
+  .badge.st-warn,
+  .value.st-warn {
+    color: var(--amber);
+  }
+  .st-bad,
+  .badge.st-bad,
+  .value.st-bad {
+    color: var(--red);
+  }
+  .st-lost,
+  .badge.st-lost,
+  .value.st-lost {
+    color: var(--dim);
+  }
+  .st-dead,
+  .badge.st-dead,
+  .value.st-dead {
+    color: var(--danger);
+  }
+
   /* ДОСЬЕ */
   .profile-top { display: flex; gap: 26px; align-items: flex-start; }
   .left { width: 260px; flex: none; }
@@ -481,10 +513,11 @@
     background: var(--dim);
     transition: height .2s ease;
   }
-  .char.tone-ok::after    { background: var(--green); }
-  .char.tone-warn::after  { background: var(--amber); }
-  .char.tone-bad::after   { background: var(--danger); }
-  .char.tone-lost::after  { background: var(--dim); }
+  .char.st-ok::after    { background: var(--green); }
+  .char.st-warn::after  { background: var(--amber); }
+  .char.st-bad::after   { background: var(--danger); }
+  .char.st-lost::after  { background: var(--dim); }
+  .char.st-dead::after  { background: var(--danger); }
 
   .char:hover {
     border-color: var(--red-dim);
@@ -540,18 +573,13 @@
     justify-content: flex-end;
   }
 
-  .char-head .badge {
+  .badge {
     font-size: 14px;
     padding: 0 8px;
     border: 1px solid currentColor;
     letter-spacing: 1px;
     white-space: nowrap;
   }
-  .char-head .badge.st-ok   { color: var(--green); }
-  .char-head .badge.st-warn { color: var(--amber); }
-  .char-head .badge.st-bad  { color: var(--red); }
-  .char-head .badge.st-lost { color: var(--dim); }
-  .char-head .badge.st-dead { color: var(--danger); }
 
   mark {
     background: rgba(157, 92, 255, 0.28);
@@ -606,7 +634,6 @@
   .modal::before { top: -1px; left: -1px; border-top: 2px solid var(--red); border-left: 2px solid var(--red); }
   .modal::after  { bottom: -1px; right: -1px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
 
-  /* Верхняя полоса — всегда фиолетовая */
   .modal .top-stripe {
     height: 3px;
     background: var(--red);
@@ -658,16 +685,7 @@
     gap: 10px 24px;
   }
   .modal-meta .label { color: var(--dim); }
-  .modal-meta .value { color: var(--text); }
-  .modal-meta .value.tone-ok   { color: var(--green); }
-  .modal-meta .value.tone-warn { color: var(--amber); }
-  .modal-meta .value.tone-bad  { color: var(--danger); }
-  .modal-meta .value.tone-lost { color: var(--dim); }
-  .modal-meta .value.st-ok     { color: var(--green); }
-  .modal-meta .value.st-warn   { color: var(--amber); }
-  .modal-meta .value.st-bad    { color: var(--red); }
-  .modal-meta .value.st-lost   { color: var(--dim); }
-  .modal-meta .value.st-dead   { color: var(--danger); }
+  /* .value.st-* уже определено выше в едином блоке статусов */
 
   .modal-body {
     padding: 14px 20px 0;
@@ -844,8 +862,7 @@
 
           <p class="log">ЗАПИСЬ 002 — РАСПРЕДЕЛЕНИЕ</p>
           <p>
-            После активации и проведения обучения она была зачислена на объект-шахту №46
-            П. Ротфронт в качестве шахтера-грузчика.
+            После активации и проведения обучения она была зачислена на объект-шахту №46            П. Ротфронт в качестве шахтера-грузчика.
           </p>
 
           <p class="log">ЗАПИСЬ 003 — СЛУЖБА</p>
@@ -906,11 +923,11 @@
               <div class="panel-head"><span class="title">MNHR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 4</span></div>
               <div class="chars">
 
-                <div class="char tone-ok">
+                <div class="char st-ok">
                   <button class="char-head" type="button"
                           data-name="400"
                           data-status="НС" data-status-tone="st-lost"
-                          data-rel="Дружба" data-rel-tone="tone-ok">
+                          data-rel="Дружба" data-rel-tone="st-ok">
                     <span class="mark">▸</span>
                     <span class="char-name">400</span>
                     <span class="badges">
@@ -924,11 +941,11 @@
                   </template>
                 </div>
 
-                <div class="char tone-ok">
+                <div class="char st-ok">
                   <button class="char-head" type="button"
                           data-name="300"
                           data-status="Активен" data-status-tone="st-ok"
-                          data-rel="Дружба" data-rel-tone="tone-ok">
+                          data-rel="Дружба" data-rel-tone="st-ok">
                     <span class="mark">▸</span>
                     <span class="char-name">300</span>
                     <span class="badges">
@@ -942,11 +959,11 @@
                   </template>
                 </div>
 
-                <div class="char tone-lost">
+                <div class="char st-lost">
                   <button class="char-head" type="button"
                           data-name="200"
                           data-status="НС" data-status-tone="st-lost"
-                          data-rel="Нейтрально" data-rel-tone="tone-lost">
+                          data-rel="Нейтрально" data-rel-tone="st-lost">
                     <span class="mark">▸</span>
                     <span class="char-name">200</span>
                     <span class="badges">
@@ -959,11 +976,11 @@
                   </template>
                 </div>
 
-                <div class="char tone-ok">
+                <div class="char st-ok">
                   <button class="char-head" type="button"
                           data-name="716"
                           data-status="НС" data-status-tone="st-lost"
-                          data-rel="Дружба" data-rel-tone="tone-ok">
+                          data-rel="Дружба" data-rel-tone="st-ok">
                     <span class="mark">▸</span>
                     <span class="char-name">716</span>
                     <span class="badges">
@@ -984,11 +1001,11 @@
               <div class="panel-head"><span class="title">GSCC</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 3</span></div>
               <div class="chars">
 
-                <div class="char tone-ok">
+                <div class="char st-ok">
                   <button class="char-head" type="button"
                           data-name="Kirra Foster"
                           data-status="Реабилитировалась" data-status-tone="st-ok"
-                          data-rel="Дружба" data-rel-tone="tone-ok">
+                          data-rel="Дружба" data-rel-tone="st-ok">
                     <span class="mark">▸</span>
                     <span class="char-name">Kirra Foster</span>
                     <span class="badges">
@@ -1002,16 +1019,16 @@
                   </template>
                 </div>
 
-                <div class="char tone-bad">
+                <div class="char st-bad">
                   <button class="char-head" type="button"
                           data-name="Гари Менгель"
                           data-status="Утерян" data-status-tone="st-dead"
-                          data-rel="Неприязнь" data-rel-tone="tone-bad">
+                          data-rel="Неприязнь" data-rel-tone="st-bad">
                     <span class="mark">▸</span>
                     <span class="char-name">Гари Менгель</span>
                     <span class="badges">
                       <span class="badge st-dead">Утерян</span>
-                      <span class="badge st-dead">Неприязнь</span>
+                      <span class="badge st-bad">Неприязнь</span>
                     </span>
                   </button>
                   <template class="char-notes">
@@ -1019,11 +1036,11 @@
                   </template>
                 </div>
 
-                <div class="char tone-lost">
+                <div class="char st-lost">
                   <button class="char-head" type="button"
                           data-name="Эдвард Фоллен"
                           data-status="НС" data-status-tone="st-lost"
-                          data-rel="Нейтрально" data-rel-tone="tone-lost">
+                          data-rel="Нейтрально" data-rel-tone="st-lost">
                     <span class="mark">▸</span>
                     <span class="char-name">Эдвард Фоллен</span>
                     <span class="badges">
@@ -1042,11 +1059,11 @@
             <div class="type-panel" data-group="ARAR">
               <div class="panel-head"><span class="title">ARAR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 1</span></div>
               <div class="chars">
-                <div class="char tone-lost">
+                <div class="char st-lost">
                   <button class="char-head" type="button"
                           data-name="595"
                           data-status="Активна" data-status-tone="st-ok"
-                          data-rel="Нейтрально" data-rel-tone="tone-lost">
+                          data-rel="Нейтрально" data-rel-tone="st-lost">
                     <span class="mark">▸</span>
                     <span class="char-name">595</span>
                     <span class="badges">
@@ -1064,11 +1081,11 @@
             <div class="type-panel" data-group="EULR">
               <div class="panel-head"><span class="title">EULR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 1</span></div>
               <div class="chars">
-                <div class="char tone-lost">
+                <div class="char st-lost">
                   <button class="char-head" type="button"
                           data-name="401"
                           data-status="НС" data-status-tone="st-lost"
-                          data-rel="Нейтрально" data-rel-tone="tone-lost">
+                          data-rel="Нейтрально" data-rel-tone="st-lost">
                     <span class="mark">▸</span>
                     <span class="char-name">401</span>
                     <span class="badges">
@@ -1086,11 +1103,11 @@
             <div class="type-panel" data-group="LSTR">
               <div class="panel-head"><span class="title">LSTR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 1</span></div>
               <div class="chars">
-                <div class="char tone-bad">
+                <div class="char st-bad">
                   <button class="char-head" type="button"
                           data-name="542"
                           data-status="Утеряна" data-status-tone="st-dead"
-                          data-rel="?" data-rel-tone="tone-lost">
+                          data-rel="?" data-rel-tone="st-lost">
                     <span class="mark">▸</span>
                     <span class="char-name">542</span>
                     <span class="badges">
@@ -1279,7 +1296,7 @@
       var status = charHead.getAttribute("data-status") || "—";
       var statusTone = charHead.getAttribute("data-status-tone") || "st-lost";
       var rel = charHead.getAttribute("data-rel") || "—";
-      var relTone = charHead.getAttribute("data-rel-tone") || "tone-lost";
+      var relTone = charHead.getAttribute("data-rel-tone") || "st-lost";
 
       modalName.textContent = name;
 
@@ -1325,6 +1342,10 @@
     modalBackdrop.addEventListener("click", function (e) {
       if (e.target === modalBackdrop) closeModal();
     });
+
+    var searchInput = document.getElementById("libSearch");
+    var accRoot = document.getElementById("typePanels");
+
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") {
         if (modalBackdrop.classList.contains("open")) {
@@ -1336,9 +1357,6 @@
         }
       }
     });
-
-    var searchInput = document.getElementById("libSearch");
-    var accRoot = document.getElementById("typePanels");
 
     var totalChars = 0;
     var cardElements = [];
@@ -1431,19 +1449,14 @@
 
       var firstGroupWithResults = null;
       typePanels.forEach(function (panel) {
-        var visible = panel.querySelectorAll(".char:not(.hidden-by-search)");
-        var anyChars = panel.querySelectorAll(".char").length > 0;
         var group = panel.getAttribute("data-group");
         var row = document.querySelector('.type-row[data-group="' + group + '"]');
+        var anyChars = panel.querySelectorAll(".char").length > 0;
+        var visible = panel.querySelectorAll(".char:not(.hidden-by-search)");
 
-        if (visible.length > 0) {
-          if (!firstGroupWithResults) firstGroupWithResults = group;
-          if (row) row.style.display = "";
-        } else {
-          if (row) row.style.display = "none";
-        }
-
-        if (!anyChars && row) row.style.display = "none";
+        var showRow = anyChars && visible.length > 0;
+        if (row) row.style.display = showRow ? "" : "none";
+        if (showRow && !firstGroupWithResults) firstGroupWithResults = group;
       });
 
       if (firstGroupWithResults) setActiveType(firstGroupWithResults);
