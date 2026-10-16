@@ -39,7 +39,6 @@
   }
   ::-webkit-scrollbar-thumb:hover { background: var(--red); }
 
-  /* ЭКРАН ЗАГРУЗКИ */
   #preloader {
     position: fixed; inset: 0; z-index: 999;
     background: #000;
@@ -219,36 +218,13 @@
   }
 
   /* ============================================================
-     ЕДИНЫЙ НАБОР СТАТУСОВ И ОТНОШЕНИЙ
-     Работает везде: в таблице, в бейджах журнала, в модалке.
+     ЕДИНЫЙ НАБОР ЦВЕТОВ СТАТУСОВ
      ============================================================ */
-  .st-ok,
-  .badge.st-ok,
-  .value.st-ok,
-  table.data td.st-ok,
-  table.data td.badge.st-ok {
-    color: var(--green);
-  }
-  .st-warn,
-  .badge.st-warn,
-  .value.st-warn {
-    color: var(--amber);
-  }
-  .st-bad,
-  .badge.st-bad,
-  .value.st-bad {
-    color: var(--red);
-  }
-  .st-lost,
-  .badge.st-lost,
-  .value.st-lost {
-    color: var(--dim);
-  }
-  .st-dead,
-  .badge.st-dead,
-  .value.st-dead {
-    color: var(--danger);
-  }
+  .st-ok   { color: var(--green); }
+  .st-warn { color: var(--amber); }
+  .st-bad  { color: var(--red); }
+  .st-lost { color: var(--dim); }
+  .st-dead { color: var(--danger); }
 
   /* ДОСЬЕ */
   .profile-top { display: flex; gap: 26px; align-items: flex-start; }
@@ -513,11 +489,11 @@
     background: var(--dim);
     transition: height .2s ease;
   }
-  .char.st-ok::after    { background: var(--green); }
-  .char.st-warn::after  { background: var(--amber); }
-  .char.st-bad::after   { background: var(--danger); }
-  .char.st-lost::after  { background: var(--dim); }
-  .char.st-dead::after  { background: var(--danger); }
+  .char.st-ok::after   { background: var(--green); }
+  .char.st-warn::after { background: var(--amber); }
+  .char.st-bad::after  { background: var(--danger); }
+  .char.st-lost::after { background: var(--dim); }
+  .char.st-dead::after { background: var(--danger); }
 
   .char:hover {
     border-color: var(--red-dim);
@@ -573,7 +549,8 @@
     justify-content: flex-end;
   }
 
-  .badge {
+  /* Бейджи — только в журнале, с рамкой */
+  .char-head .badge {
     font-size: 14px;
     padding: 0 8px;
     border: 1px solid currentColor;
@@ -685,7 +662,7 @@
     gap: 10px 24px;
   }
   .modal-meta .label { color: var(--dim); }
-  /* .value.st-* уже определено выше в едином блоке статусов */
+  /* .value.st-* уже определено в блоке статусов */
 
   .modal-body {
     padding: 14px 20px 0;
@@ -829,7 +806,7 @@
               <tr><th>Обозначение</th><td>MNHR.04.063</td></tr>
               <tr><th>Тип</th><td>Реплика</td></tr>
               <tr><th>Место службы</th><td>ERES-427</td></tr>
-              <tr><th>Статус</th><td class="badge st-ok">АКТИВЕН</td></tr>
+              <tr><th>Статус</th><td class="st-ok">АКТИВЕН</td></tr>
             </table>
 
             <div class="inspection">
@@ -862,7 +839,8 @@
 
           <p class="log">ЗАПИСЬ 002 — РАСПРЕДЕЛЕНИЕ</p>
           <p>
-            После активации и проведения обучения она была зачислена на объект-шахту №46            П. Ротфронт в качестве шахтера-грузчика.
+            После активации и проведения обучения она была зачислена на объект-шахту №46
+            П. Ротфронт в качестве шахтера-грузчика.
           </p>
 
           <p class="log">ЗАПИСЬ 003 — СЛУЖБА</p>
