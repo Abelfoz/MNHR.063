@@ -29,6 +29,9 @@
     line-height: 1.35;
     background: radial-gradient(ellipse at center, #101010 0%, var(--bg) 75%);
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -39,9 +42,7 @@
   }
   ::-webkit-scrollbar-thumb:hover { background: var(--red); }
 
-  /* ============================================================
-     ФОН: сетка + развёртка + пульсирующие углы
-     ============================================================ */
+  /* ФОН: сетка + развёртка + пульсирующие углы */
   body::before {
     content: "";
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -118,11 +119,12 @@
   @keyframes blink { 50% { opacity: 0; } }
 
   .wrap {
+    width: 100%;
     max-width: 1080px;
-    margin: 0 auto;
     display: flex;
     gap: 22px;
     align-items: flex-start;
+    justify-content: center;
     position: relative;
     z-index: 2;
   }
@@ -259,7 +261,6 @@
     letter-spacing: 1px;
   }
 
-  /* Статусы */
   .st-ok   { color: var(--green); }
   .st-warn { color: var(--amber); }
   .st-dead { color: var(--danger); }
@@ -287,7 +288,6 @@
   .frame::before { top: -1px; left: -1px; border-top: 2px solid var(--red); border-left: 2px solid var(--red); }
   .frame::after { bottom: -1px; right: -1px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
 
-  /* Фото в ДОСЬЕ — цветное */
   .photo {
     display: block; width: 100%;
     transition: filter .3s ease;
@@ -364,7 +364,6 @@
     border-radius: 50%;
   }
 
-  /* Фото в ОТЧЁТЕ — ч/б, как было */
   .report-photo { float: right; width: 300px; margin: 0 0 14px 22px; }
   .report-photo .frame { padding: 4px; }
   .report-photo .photo {
@@ -714,7 +713,7 @@
   }
 
   @media (max-width: 900px) {
-    .wrap { flex-direction: column; gap: 0; }
+    .wrap { flex-direction: column; gap: 0; align-items: stretch; }
     .sidebar {
       position: static;
       flex: none;
