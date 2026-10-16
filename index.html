@@ -39,6 +39,54 @@
   }
   ::-webkit-scrollbar-thumb:hover { background: var(--red); }
 
+  /* ============================================================
+     ФОН: сетка + развёртка + пульсирующие углы
+     ============================================================ */
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(157, 92, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(157, 92, 255, 0.045) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 85%);
+  }
+
+  body::after {
+    content: "";
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(157, 92, 255, 0.035) 50%,
+      transparent 100%);
+    background-size: 100% 260px;
+    animation: bg-scan 9s linear infinite;
+  }
+  @keyframes bg-scan {
+    from { background-position: 0 -260px; }
+    to   { background-position: 0 100vh; }
+  }
+
+  .site-corners {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  }
+  .site-corners span {
+    position: absolute;
+    width: 22px; height: 22px;
+    opacity: 0.5;
+    animation: corner-breathe 6s ease-in-out infinite;
+  }
+  .site-corners span:nth-child(1) { top: 12px;    left: 12px;    border-top: 2px solid var(--red); border-left: 2px solid var(--red); animation-delay: 0s; }
+  .site-corners span:nth-child(2) { top: 12px;    right: 12px;   border-top: 2px solid var(--red); border-right: 2px solid var(--red); animation-delay: 1.5s; }
+  .site-corners span:nth-child(3) { bottom: 12px; left: 12px;    border-bottom: 2px solid var(--red); border-left: 2px solid var(--red); animation-delay: 3s; }
+  .site-corners span:nth-child(4) { bottom: 12px; right: 12px;   border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); animation-delay: 4.5s; }
+  @keyframes corner-breathe {
+    0%, 100% { opacity: 0.25; }
+    50%      { opacity: 0.7; }
+  }
+
+  /* ЭКРАН ЗАГРУЗКИ */
   #preloader {
     position: fixed; inset: 0; z-index: 999;
     background: #000;
@@ -69,20 +117,14 @@
   @keyframes preloader-out { to { opacity: 0; visibility: hidden; } }
   @keyframes blink { 50% { opacity: 0; } }
 
-  body::before {
-    content: "";
-    position: fixed; inset: 0; z-index: 10; pointer-events: none;
-    background:
-      repeating-linear-gradient(0deg, rgba(0,0,0,0.28) 0 1px, transparent 1px 3px),
-      radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
-  }
-
   .wrap {
     max-width: 1080px;
     margin: 0 auto;
     display: flex;
     gap: 22px;
     align-items: flex-start;
+    position: relative;
+    z-index: 2;
   }
 
   #terminal {
@@ -217,14 +259,11 @@
     letter-spacing: 1px;
   }
 
-  /* ============================================================
-     ЕДИНЫЙ НАБОР ЦВЕТОВ СТАТУСОВ
-     ============================================================ */
+  /* Статусы */
   .st-ok   { color: var(--green); }
   .st-warn { color: var(--amber); }
-  .st-bad  { color: var(--red); }
-  .st-lost { color: var(--dim); }
   .st-dead { color: var(--danger); }
+  .st-lost { color: var(--dim); }
 
   /* ДОСЬЕ */
   .profile-top { display: flex; gap: 26px; align-items: flex-start; }
@@ -248,13 +287,13 @@
   .frame::before { top: -1px; left: -1px; border-top: 2px solid var(--red); border-left: 2px solid var(--red); }
   .frame::after { bottom: -1px; right: -1px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
 
+  /* Фото в ДОСЬЕ — цветное */
   .photo {
     display: block; width: 100%;
-    filter: grayscale(1) contrast(1.25) brightness(0.9);
     transition: filter .3s ease;
   }
   .frame:hover .photo {
-    filter: grayscale(1) contrast(1.35) brightness(1);
+    filter: contrast(1.1) brightness(1.05);
   }
 
   .photo-wrap { position: relative; }
@@ -325,6 +364,7 @@
     border-radius: 50%;
   }
 
+  /* Фото в ОТЧЁТЕ — ч/б, как было */
   .report-photo { float: right; width: 300px; margin: 0 0 14px 22px; }
   .report-photo .frame { padding: 4px; }
   .report-photo .photo {
@@ -482,25 +522,12 @@
     position: relative;
     transition: border-color .2s ease, background .2s ease, transform .2s ease;
   }
-  .char::after {
-    content: "";
-    position: absolute; left: 0; right: 0; bottom: 0;
-    height: 3px;
-    background: var(--dim);
-    transition: height .2s ease;
-  }
-  .char.st-ok::after   { background: var(--green); }
-  .char.st-warn::after { background: var(--amber); }
-  .char.st-bad::after  { background: var(--danger); }
-  .char.st-lost::after { background: var(--dim); }
-  .char.st-dead::after { background: var(--danger); }
 
   .char:hover {
     border-color: var(--red-dim);
     background: #0d0818;
     transform: translateY(-1px);
   }
-  .char:hover::after { height: 5px; }
 
   .char-head {
     display: flex;
@@ -535,12 +562,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .char-head .char-name::after {
-    content: " ✦";
-    color: var(--red);
-    font-size: 14px;
-    opacity: 0.6;
-  }
 
   .char-head .badges {
     display: flex;
@@ -549,7 +570,6 @@
     justify-content: flex-end;
   }
 
-  /* Бейджи — только в журнале, с рамкой */
   .char-head .badge {
     font-size: 14px;
     padding: 0 8px;
@@ -662,7 +682,6 @@
     gap: 10px 24px;
   }
   .modal-meta .label { color: var(--dim); }
-  /* .value.st-* уже определено в блоке статусов */
 
   .modal-body {
     padding: 14px 20px 0;
@@ -766,6 +785,10 @@
 </head>
 <body>
 
+<div class="site-corners" aria-hidden="true">
+  <span></span><span></span><span></span><span></span>
+</div>
+
 <div id="preloader">
   <div class="line">ОТКРЫТИЕ ДОКУМЕНТА<span class="cursor"></span></div>
   <div class="bar"></div>
@@ -839,8 +862,7 @@
 
           <p class="log">ЗАПИСЬ 002 — РАСПРЕДЕЛЕНИЕ</p>
           <p>
-            После активации и проведения обучения она была зачислена на объект-шахту №46
-            П. Ротфронт в качестве шахтера-грузчика.
+            После активации и проведения обучения она была зачислена на объект-шахту №46            П. Ротфронт в качестве шахтера-грузчика.
           </p>
 
           <p class="log">ЗАПИСЬ 003 — СЛУЖБА</p>
@@ -997,16 +1019,16 @@
                   </template>
                 </div>
 
-                <div class="char st-bad">
+                <div class="char st-dead">
                   <button class="char-head" type="button"
                           data-name="Гари Менгель"
                           data-status="Утерян" data-status-tone="st-dead"
-                          data-rel="Неприязнь" data-rel-tone="st-bad">
+                          data-rel="Неприязнь" data-rel-tone="st-dead">
                     <span class="mark">▸</span>
                     <span class="char-name">Гари Менгель</span>
                     <span class="badges">
                       <span class="badge st-dead">Утерян</span>
-                      <span class="badge st-bad">Неприязнь</span>
+                      <span class="badge st-dead">Неприязнь</span>
                     </span>
                   </button>
                   <template class="char-notes">
@@ -1081,7 +1103,7 @@
             <div class="type-panel" data-group="LSTR">
               <div class="panel-head"><span class="title">LSTR</span><span class="dash"></span><span class="records">ЗАПИСЕЙ: 1</span></div>
               <div class="chars">
-                <div class="char st-bad">
+                <div class="char st-dead">
                   <button class="char-head" type="button"
                           data-name="542"
                           data-status="Утеряна" data-status-tone="st-dead"
